@@ -30,6 +30,21 @@ models:
           - unique
           - not_null
       - name: status
+       
+  - name: stg_payments
+    description: This model cleans up customer data
+    columns:
+      - name: customer_id
+        description: Primary key
         tests:
-          - accepted_values:
-              values: ['placed', 'shipped', 'completed', 'return_pending', 'returned']
+          - unique
+          - not_null
+
+  - name: orders
+    description: One record per customer
+    columns:
+      - name: customer_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null

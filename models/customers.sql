@@ -9,22 +9,28 @@ orders as (
     select * from {{ ref('stg_orders') }}
 
 ),
+payments as (
+
+    select * from {{ ref('stg_payments') }}
+
+),
 
 customer_orders as (
 
     select
         customer_id,
-
+        order_id,
         min(order_date) as first_order_date,
         max(order_date) as most_recent_order_date,
         count(order_id) as number_of_orders
+        
+    from orders left join payments using (customer_id)
 
-    from orders
-
-    group by 1
+    group by 1,2
 
 ),
-
+ltv as 
+(select customer_id, sum(amount) as ltv from payments group by 1),
 
 final as (
 
@@ -33,13 +39,17 @@ final as (
         customers.first_name,
         customers.last_name,
         customer_orders.first_order_date,
-        customers.ltv,
+        customer_orders.order_id,
         customer_orders.most_recent_order_date,
-        coalesce(customer_orders.number_of_orders, 0) as number_of_orders
+        coalesce(customer_orders.number_of_orders, 0) as number_of_orders,
+        ltv.ltv as ltv
+        
 
     from customers
 
-    left join customer_orders using (customer_id)
+   left join customer_orders using (customer_id)
+   left join ltv using (customer_id)
+ 
 
 )
 
